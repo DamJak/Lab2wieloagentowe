@@ -24,6 +24,7 @@ public class Dist_beh extends CyclicBehaviour {
     int sizeX = 4;
     int ile_poprawnych =0;
     int wynik[][] = new int[sizeX][sizeX];
+    int ile_bledow =0;
 
     public void action() {
         ACLMessage wiadomosc = new ACLMessage();
@@ -88,6 +89,23 @@ public class Dist_beh extends CyclicBehaviour {
                 System.out.println(elementy_do_zrobienia);
                 System.out.println("Agent: " + wiadomosc.getSender().getName() + " Podał wynik: " + parts[2]);
 
+            }
+            else if (wiadomosc.getPerformative() == ACLMessage.FAILURE)
+            {
+                System.out.println("AGENT ZGLOSIL BLAD");
+                ile_bledow++;
+                String odb = wiadomosc.getContent();
+                String[] parts = odb.split(" ");
+                ile_poprawnych++;
+                wynik[Integer.parseInt(parts[0])][Integer.parseInt(parts[1])] = 99;
+                for (int i = 0; i < sizeX; i++) {
+                    for (int j = 0; j < sizeX; j++) {
+                        System.out.print(wynik[i][j] + " ");
+                    }
+                    System.out.println();
+                }
+
+                System.out.println(wiadomosc.getContent());
             }
 
         }

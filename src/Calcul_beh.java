@@ -32,22 +32,38 @@ public class Calcul_beh extends CyclicBehaviour {
                 if(Mess_Rcv.getPerformative() == ACLMessage.REQUEST)
                 {
                     String[] parts = odb.split(" ");
-                    SB.delete(0, SB.length());
-
-                    wynik=0;
-                    for (int i = 3; i < (Integer.parseInt(parts[0]) + 3); i++) {
-                        wynik += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[0])]);
+                    if(Rand(0,100)<15)
+                    {
+                        SB.delete(0, SB.length());
+                        Answ.setPerformative(ACLMessage.FAILURE);
+                        SB.append(0);
+                        SB.append(' ');
+                        SB.append(parts[1]);
+                        SB.append(' ');
+                        SB.append(parts[2]);
+                        Answ.setContent(SB.toString());
+                        myAgent.send(Answ);
+                        block(2000);
                     }
-                    SB.append(Integer.parseInt(parts[0])); //aktualna pozycja
-                    SB.append(' ');
-                    SB.append(Integer.parseInt(parts[1]));
-                    SB.append(' ');
-                    SB.append(wynik);
+                    else
+                    {
+                        SB.delete(0, SB.length());
 
-                    wynik=0;
-                    block(Rand(500,1500));
-                    Answ.setPerformative(ACLMessage.AGREE);
-                    myAgent.send(Answ);
+                        wynik = 0;
+                        for (int i = 3; i < (Integer.parseInt(parts[0]) + 3); i++) {
+                            wynik += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[0])]);
+                        }
+                        SB.append(Integer.parseInt(parts[0])); //aktualna pozycja
+                        SB.append(' ');
+                        SB.append(Integer.parseInt(parts[1]));
+                        SB.append(' ');
+                        SB.append(wynik);
+
+                        wynik = 0;
+                        block(Rand(500, 1500));
+                        Answ.setPerformative(ACLMessage.AGREE);
+                        myAgent.send(Answ);
+                    }
                 }
 
             }
