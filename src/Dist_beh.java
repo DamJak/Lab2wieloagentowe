@@ -15,6 +15,12 @@ public class Dist_beh extends CyclicBehaviour {
     }
 
     int tab[][];
+    List elementy_do_zrobienia = new LinkedList();
+    String elem;
+    List robione = new LinkedList();
+    String str = "";
+    StringBuffer SB = new StringBuffer(str);
+    String ij[];
     int sizeX = 4;
 
     public void action() {
@@ -26,15 +32,39 @@ public class Dist_beh extends CyclicBehaviour {
         {
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
-                for (int i = 0; i < sizeX; i++) {
-                    for (int j = 0; j < sizeX; j++) {
-                        System.out.print(tab[i][j] + " ");
+
+                for(int i = 0; i< elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
+                {
+                    elem = elementy_do_zrobienia.get(i).toString();
+                    if(!robione.contains(elem))
+                    {
+                        robione.add(elem);
+                        break;
                     }
-                    System.out.println();
+                }
+                ij = elem.split(" ");
+                SB.append(' ');
+                SB.append(tab[0].length);//rozmiar
+                SB.append(' ');
+
+                SB.append(ij[0]); //aktualna pozycja
+                SB.append(' ');
+                SB.append(ij[1]);
+                SB.append(' ');
+
+                //zapis do stringa
+                for (int k = 0; k < tab[0].length; k++) {
+                    SB.append(tab[Integer.parseInt(ij[0])][k]);
+                    SB.append(' ');
+                }
+                for (int m = 0; m < tab.length; m++) {
+                    SB.append(tab[m][Integer.parseInt(ij[1])]);
+                    SB.append(' ');
                 }
 
+
                 ACLMessage Answ = wiadomosc.createReply();
-                Answ.setContent(tab.toString());
+                Answ.setContent(SB.toString());
                 System.out.println("WYSYLAM DO "+ wiadomosc.getSender());
                 Answ.setPerformative(ACLMessage.REQUEST);
                 myAgent.send(Answ);
