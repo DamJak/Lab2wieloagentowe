@@ -13,8 +13,12 @@ public class Dist_beh extends CyclicBehaviour {
         {
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
-                System.out.println("MAM KOMUNIKAT");
+                ACLMessage Answ = wiadomosc.createReply();
+                System.out.println("WYSYLAM DO "+ wiadomosc.getSender());
+                Answ.setPerformative(ACLMessage.REQUEST);
+                myAgent.send(Answ);
             }
+
         }
         else
         {

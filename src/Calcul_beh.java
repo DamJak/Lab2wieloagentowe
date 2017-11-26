@@ -6,21 +6,38 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
-import java.util.Random;
+
 
 public class Calcul_beh extends CyclicBehaviour {
 
     public void action()
     {
+
+        ACLMessage Mess_Rcv = new ACLMessage();
         if(Fnd_Serv(myAgent)!=null)
         {
-            ACLMessage Mess_Snd = new ACLMessage();
-            AID server = Fnd_Serv(myAgent)[0].getName();
-            Mess_Snd.setPerformative(ACLMessage.INFORM);
-            Mess_Snd.addReceiver(server);
-            myAgent.send(Mess_Snd);
-        }
+            Mess_Rcv = myAgent.receive();
 
+            if(Mess_Rcv !=null)
+            {
+                if(Mess_Rcv.getPerformative() == ACLMessage.REQUEST)
+                {
+                    System.out.println("ODEBRALEM ODPOWIEDDZ");
+                }
+
+            }
+            else {
+                if(Fnd_Serv(myAgent)!=null)
+                {
+                    ACLMessage Mess_Snd = new ACLMessage();
+                    AID server = Fnd_Serv(myAgent)[0].getName();
+                    Mess_Snd.setPerformative(ACLMessage.INFORM);
+                    Mess_Snd.addReceiver(server);
+                    myAgent.send(Mess_Snd);
+                }
+                block();
+            }
+        }
     }
 
     public DFAgentDescription[] Fnd_Serv(Agent myAgent)
