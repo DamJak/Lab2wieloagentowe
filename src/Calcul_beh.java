@@ -6,9 +6,14 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.util.Random;
 
 
 public class Calcul_beh extends CyclicBehaviour {
+
+    Integer wynik = 0;
+    String str="";
+    StringBuffer SB = new StringBuffer(str);
 
     public void action()
     {
@@ -20,9 +25,29 @@ public class Calcul_beh extends CyclicBehaviour {
 
             if(Mess_Rcv !=null)
             {
+
+                String odb = Mess_Rcv.getContent();
+                ACLMessage Answ = Mess_Rcv.createReply();
+
                 if(Mess_Rcv.getPerformative() == ACLMessage.REQUEST)
                 {
-                    System.out.println(Mess_Rcv.getContent());
+                    String[] parts = odb.split(" ");
+                    SB.delete(0, SB.length());
+
+                    wynik=0;
+                    for (int i = 3; i < (Integer.parseInt(parts[0]) + 3); i++) {
+                        wynik += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[0])]);
+                    }
+                    SB.append(Integer.parseInt(parts[0])); //aktualna pozycja
+                    SB.append(' ');
+                    SB.append(Integer.parseInt(parts[1]));
+                    SB.append(' ');
+                    SB.append(wynik);
+
+                    wynik=0;
+                    block(Rand(500,1500));
+                    Answ.setPerformative(ACLMessage.AGREE);
+                    myAgent.send(Answ);
                 }
 
             }
@@ -53,6 +78,11 @@ public class Calcul_beh extends CyclicBehaviour {
         } catch (Exception ex) {
         }
         return result;
+    }
+    public static Integer Rand(Integer a, Integer b){
+        Random r = new Random();
+        return r.nextInt(b-a+1)+a;
+
     }
 
 }
