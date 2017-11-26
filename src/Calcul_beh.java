@@ -22,7 +22,7 @@ public class Calcul_beh extends CyclicBehaviour {
             {
                 if(Mess_Rcv.getPerformative() == ACLMessage.REQUEST)
                 {
-                    System.out.println("ODEBRALEM ODPOWIEDDZ");
+                    System.out.println(Mess_Rcv.getContent());
                 }
 
             }
