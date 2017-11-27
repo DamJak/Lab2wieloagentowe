@@ -37,6 +37,7 @@ public class Dist_beh extends CyclicBehaviour {
     List<AID> lista_klientow = new LinkedList();
     AID klient_testujacy = new AID();
     int wynik_po_tescie=0;
+    AID klient_sedziujacy = new AID();
 
     public void action() {
         ACLMessage wiadomosc = new ACLMessage();
@@ -143,15 +144,18 @@ public class Dist_beh extends CyclicBehaviour {
                     }
                     else
                     {
-                        System.out.println("Wynik sie nie zgadza");
-                        System.out.println("PO PRZEPROWADZONYCH TESTACH WYNIK ["+ Integer.parseInt(parts[1])+
-                                "]["+Integer.parseInt(parts[2])+"] SIE ZGADZA");
-                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = 99;
-                        wypisz(wynik,sizeX);
-                        ile_poprawnych++;
-                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
-                        System.out.println(elementy_do_zrobienia);
-                        flag=false;
+                        ACLMessage wiadomosc_sedziowana = new ACLMessage();
+                        for (int i = 0; i< lista_klientow.size(); i++)
+                        {
+                            if (!klient_testowany.equals(lista_klientow.get(i)) && !klient_testujacy.equals(lista_klientow.get(i)));
+                            klient_sedziujacy = lista_klientow.get(i);
+                            wiadomosc_sedziowana.addReceiver(lista_klientow.get(i));
+                            break;
+                        }
+                        wiadomosc_sedziowana.setPerformative(ACLMessage.REQUEST);
+                        wiadomosc_sedziowana.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab,2));
+                        System.out.println("Wysylam do sedziego");
+                        myAgent.send(wiadomosc_sedziowana);
                     }
 
                 }

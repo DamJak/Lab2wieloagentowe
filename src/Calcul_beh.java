@@ -69,6 +69,10 @@ public class Calcul_beh extends CyclicBehaviour {
                         Answ.setPerformative(ACLMessage.AGREE);
                         myAgent.send(Answ);
                     }
+                    else if(Integer.parseInt(parts[0]) == 2)
+                    {
+                        System.out.println("ODEBRALEM DO SEDZIOWANA" +  Mess_Rcv.getContent());
+                    }
 
                 }
                 else if(Mess_Rcv.getPerformative() == ACLMessage.CANCEL)
