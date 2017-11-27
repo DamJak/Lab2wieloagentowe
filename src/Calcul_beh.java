@@ -65,6 +65,12 @@ public class Calcul_beh extends CyclicBehaviour {
                         myAgent.send(Answ);
                     }
                 }
+                else if(Mess_Rcv.getPerformative() == ACLMessage.CANCEL)
+                {
+                    System.out.println("Nie mam co robic " + myAgent.getName().toString());
+                    myAgent.doDelete();
+
+                }
 
             }
             else {

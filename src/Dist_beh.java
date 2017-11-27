@@ -40,7 +40,12 @@ public class Dist_beh extends CyclicBehaviour {
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
                 ACLMessage Answ = wiadomosc.createReply();
-                if (robione.size()<sizeX*sizeX ) {
+                if(ile_wyslanych >(sizeX*sizeX)-1 && ile_bledow == 0 && robione.size()==sizeX*sizeX )
+                {
+                    Answ.setPerformative(ACLMessage.CANCEL);
+
+                }
+                else if (robione.size()<sizeX*sizeX ) {
                     for (int i = 0; i < elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
                     {
                         elem = elementy_do_zrobienia.get(i).toString();
