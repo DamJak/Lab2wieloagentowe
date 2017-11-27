@@ -1,4 +1,5 @@
 
+import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
@@ -29,6 +30,12 @@ public class Dist_beh extends CyclicBehaviour {
     int ile_wyslanych = 0;
     int numerbledu=0;
     Boolean blad =false;
+    int czy_test = 0;
+    Boolean flag=false;
+    int wynik_do_testu=0;
+    AID klient_testowany = new AID();
+    List<AID> lista_klientow = new LinkedList();
+    AID klient_testujacy = new AID();
 
     public void action() {
         ACLMessage wiadomosc = new ACLMessage();
@@ -37,6 +44,10 @@ public class Dist_beh extends CyclicBehaviour {
 
         if(wiadomosc != null)
         {
+            if(!lista_klientow.contains(wiadomosc.getSender()))
+            {
+                lista_klientow.add(wiadomosc.getSender());
+            }
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
                 ACLMessage Answ = wiadomosc.createReply();
@@ -46,19 +57,21 @@ public class Dist_beh extends CyclicBehaviour {
 
                 }
                 else if (robione.size()<sizeX*sizeX ) {
-                    for (int i = 0; i < elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
+                    for(int i = 0; i< elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
                     {
                         elem = elementy_do_zrobienia.get(i).toString();
-                        if (!robione.contains(elem)) {
+                        if(!robione.contains(elem))
+                        {
                             robione.add(elem);
                             break;
                         }
                     }
+                    System.out.println("WYSYLAM DO "+ wiadomosc.getSender());
+                    System.out.println(elementy_do_zrobienia);
                     ij = elem.split(" ");
-
-                    Answ.setContent(Crt_str(Integer.parseInt(ij[0]),Integer.parseInt(ij[1]),tab));
-                    System.out.println("WYSYLAM DO " + wiadomosc.getSender());
+                    elem="";
                     Answ.setPerformative(ACLMessage.REQUEST);
+                    Answ.setContent(Crt_str(Integer.parseInt(ij[0]),Integer.parseInt(ij[1]),tab,0));
                     ile_wyslanych++;
                 }else if(ile_bledow >0&& (ile_poprawnych + ile_bledow)>(sizeX*sizeX)-1)
                 {
@@ -66,7 +79,7 @@ public class Dist_beh extends CyclicBehaviour {
                     blad =true;
                     String[] parts = lista_bledow.get(numerbledu).toString().split(" ");
                     Answ.setPerformative(ACLMessage.REQUEST);
-                    Answ.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab));
+                    Answ.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab,0));
                     numerbledu++;
                     ile_bledow--;
                 }
@@ -77,18 +90,41 @@ public class Dist_beh extends CyclicBehaviour {
             {
                 String odb = wiadomosc.getContent();
                 String[] parts = odb.split(" ");
-                ile_poprawnych++;
-                wynik[Integer.parseInt(parts[0])][Integer.parseInt(parts[1])] = Integer.parseInt(parts[2]);
-                for (int i = 0; i < sizeX; i++) {
-                    for (int j = 0; j < sizeX; j++) {
-                        System.out.print(wynik[i][j] + " ");
+                if(Integer.parseInt(parts[0])==0)
+                {
+                    if(czy_test == 3 && blad == false && flag == false)
+                    {
+                        System.out.println("Wynik bedzie testowany");
+                        ACLMessage wiadomosc_testowana = new ACLMessage();
+                        flag=true;
+                        wynik_do_testu=Integer.parseInt(parts[3]);
+                        wiadomosc_testowana.setPerformative(ACLMessage.REQUEST);
+                        wiadomosc_testowana.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab,1));
+                        klient_testowany = wiadomosc.getSender();
+                        for (int i = 0; i< lista_klientow.size(); i++)
+                        {
+                            if (!klient_testowany.equals(lista_klientow.get(i)));
+                            klient_testujacy = lista_klientow.get(i);
+                            wiadomosc_testowana.addReceiver(lista_klientow.get(i));
+                            break;
+                        }
+                        myAgent.send(wiadomosc_testowana);
                     }
-                    System.out.println();
-                }
+                    else {
 
-                elementy_do_zrobienia.remove(Integer.parseInt(parts[0]) + " " + Integer.parseInt(parts[1]));
-                System.out.println(elementy_do_zrobienia);
-                System.out.println("Agent: " + wiadomosc.getSender().getName() + " Podał wynik: " + parts[2]);
+                        ile_poprawnych++;
+                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = Integer.parseInt(parts[3]);
+                        wypisz(wynik,sizeX);
+
+                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
+                        System.out.println(elementy_do_zrobienia);
+                        System.out.println("Agent: " + wiadomosc.getSender().getName() + " Podał wynik: " + parts[3]);
+                    }
+
+                    if (czy_test == 3)
+                        czy_test = 0;
+                    czy_test++;
+                }
 
             }
             else if (wiadomosc.getPerformative() == ACLMessage.FAILURE)
@@ -106,9 +142,11 @@ public class Dist_beh extends CyclicBehaviour {
         }
 
     }
-    public String Crt_str(Integer i ,Integer j, int tab[][])
+    public String Crt_str(Integer i ,Integer j, int tab[][],int typ)
     {
         SB.delete(0,SB.length());
+        SB.append(typ);//rozmiar
+        SB.append(' ');
         SB.append(tab[0].length);//rozmiar
         SB.append(' ');
 
@@ -127,6 +165,15 @@ public class Dist_beh extends CyclicBehaviour {
             SB.append(' ');
         }
         return SB.toString();
+    }
+    public void wypisz(int[][] wynik,int sizeX)
+    {
+        for (int i = 0; i < sizeX; i++) {
+            for (int j = 0; j < sizeX; j++) {
+                System.out.print(wynik[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 
 
