@@ -71,7 +71,14 @@ public class Calcul_beh extends CyclicBehaviour {
                     }
                     else if(Integer.parseInt(parts[0]) == 2)
                     {
-                        System.out.println("ODEBRALEM DO SEDZIOWANA" +  Mess_Rcv.getContent());
+                        SB.delete(0, SB.length());
+                        for (int i = 4; i < (Integer.parseInt(parts[1]) + 4); i++) {
+                            wynik1 += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[1])]);
+                        }
+                        Answ.setContent(Crt_str(parts[2],parts[3],wynik1,2));
+                        wynik1=0;
+                        Answ.setPerformative(ACLMessage.AGREE);
+                        myAgent.send(Answ);
                     }
 
                 }

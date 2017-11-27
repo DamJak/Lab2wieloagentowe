@@ -159,6 +159,17 @@ public class Dist_beh extends CyclicBehaviour {
                     }
 
                 }
+                else if(Integer.parseInt(parts[0])==2)
+                {
+                    if (Integer.parseInt(parts[3]) == wynik_po_tescie)
+                    {
+                        System.out.println("Po sedziowaniu Wynik2 == wynik3");
+                    }
+                    else if (wynik_do_testu == Integer.parseInt(parts[3]))
+                    {
+                        System.out.println("Po sedziowaniu Wynik1 == wynik3");
+                    }
+                }
 
             }
             else if (wiadomosc.getPerformative() == ACLMessage.FAILURE)
