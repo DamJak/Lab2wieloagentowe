@@ -25,6 +25,10 @@ public class Dist_beh extends CyclicBehaviour {
     int ile_poprawnych =0;
     int wynik[][] = new int[sizeX][sizeX];
     int ile_bledow =0;
+    List lista_bledow = new LinkedList();
+    int ile_wyslanych = 0;
+    int numerbledu=0;
+    Boolean blad =false;
 
     public void action() {
         ACLMessage wiadomosc = new ACLMessage();
@@ -35,41 +39,33 @@ public class Dist_beh extends CyclicBehaviour {
         {
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
-
-                for(int i = 0; i< elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
-                {
-                    elem = elementy_do_zrobienia.get(i).toString();
-                    if(!robione.contains(elem))
-                    {
-                        robione.add(elem);
-                        break;
-                    }
-                }
-                ij = elem.split(" ");
-                SB.append(' ');
-                SB.append(tab[0].length);//rozmiar
-                SB.append(' ');
-
-                SB.append(ij[0]); //aktualna pozycja
-                SB.append(' ');
-                SB.append(ij[1]);
-                SB.append(' ');
-
-                //zapis do stringa
-                for (int k = 0; k < tab[0].length; k++) {
-                    SB.append(tab[Integer.parseInt(ij[0])][k]);
-                    SB.append(' ');
-                }
-                for (int m = 0; m < tab.length; m++) {
-                    SB.append(tab[m][Integer.parseInt(ij[1])]);
-                    SB.append(' ');
-                }
-
-
                 ACLMessage Answ = wiadomosc.createReply();
-                Answ.setContent(SB.toString());
-                System.out.println("WYSYLAM DO "+ wiadomosc.getSender());
-                Answ.setPerformative(ACLMessage.REQUEST);
+                if (robione.size()<sizeX*sizeX ) {
+                    for (int i = 0; i < elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
+                    {
+                        elem = elementy_do_zrobienia.get(i).toString();
+                        if (!robione.contains(elem)) {
+                            robione.add(elem);
+                            break;
+                        }
+                    }
+                    ij = elem.split(" ");
+
+                    Answ.setContent(Crt_str(Integer.parseInt(ij[0]),Integer.parseInt(ij[1]),tab));
+                    System.out.println("WYSYLAM DO " + wiadomosc.getSender());
+                    Answ.setPerformative(ACLMessage.REQUEST);
+                    ile_wyslanych++;
+                }else if(ile_bledow >0&& (ile_poprawnych + ile_bledow)>(sizeX*sizeX)-1)
+                {
+                    System.out.println("OBSLUGA BLEDOW");
+                    blad =true;
+                    String[] parts = lista_bledow.get(numerbledu).toString().split(" ");
+                    Answ.setPerformative(ACLMessage.REQUEST);
+                    Answ.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab));
+                    numerbledu++;
+                    ile_bledow--;
+                }
+
                 myAgent.send(Answ);
             }
             else if(wiadomosc.getPerformative() == ACLMessage.AGREE)
@@ -94,17 +90,7 @@ public class Dist_beh extends CyclicBehaviour {
             {
                 System.out.println("AGENT ZGLOSIL BLAD");
                 ile_bledow++;
-                String odb = wiadomosc.getContent();
-                String[] parts = odb.split(" ");
-                ile_poprawnych++;
-                wynik[Integer.parseInt(parts[0])][Integer.parseInt(parts[1])] = 99;
-                for (int i = 0; i < sizeX; i++) {
-                    for (int j = 0; j < sizeX; j++) {
-                        System.out.print(wynik[i][j] + " ");
-                    }
-                    System.out.println();
-                }
-
+                lista_bledow.add(wiadomosc.getContent());
                 System.out.println(wiadomosc.getContent());
             }
 
@@ -114,6 +100,28 @@ public class Dist_beh extends CyclicBehaviour {
             block();
         }
 
+    }
+    public String Crt_str(Integer i ,Integer j, int tab[][])
+    {
+        SB.delete(0,SB.length());
+        SB.append(tab[0].length);//rozmiar
+        SB.append(' ');
+
+        SB.append(i); //aktualna pozycja
+        SB.append(' ');
+        SB.append(j);
+        SB.append(' ');
+
+        //zapis do stringa
+        for (int k = 0; k < tab[0].length; k++) {
+            SB.append(tab[i][k]);
+            SB.append(' ');
+        }
+        for (int m = 0; m < tab.length; m++) {
+            SB.append(tab[m][j]);
+            SB.append(' ');
+        }
+        return SB.toString();
     }
 
 
