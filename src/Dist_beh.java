@@ -1,10 +1,9 @@
-
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-
-import java.util.LinkedList;
 import java.util.List;
+import java.util.LinkedList;
+import java.util.Random;
 
 public class Dist_beh extends CyclicBehaviour {
 
@@ -14,29 +13,32 @@ public class Dist_beh extends CyclicBehaviour {
         elementy_do_zrobienia =elem;
 
     }
-
+    int i = 0;
+    int j = 0;
+    int numerbledu=0;
+    Integer sizeX = 8;
     int tab[][];
-    List elementy_do_zrobienia = new LinkedList();
-    String elem;
     List robione = new LinkedList();
+    int wynik[][] = new int[sizeX][sizeX];
+
     String str = "";
     StringBuffer SB = new StringBuffer(str);
-    String ij[];
-    int sizeX = 4;
-    int ile_poprawnych =0;
-    int wynik[][] = new int[sizeX][sizeX];
-    int ile_bledow =0;
-    List lista_bledow = new LinkedList();
     int ile_wyslanych = 0;
-    int numerbledu=0;
-    Boolean blad =false;
+    int ile_bledow =0;
+    int ile_poprawnych =0;
+    List lista_bledow = new LinkedList();
+    List elementy_do_zrobienia = new LinkedList();
+    String elem;
+    String ij[];
     int czy_test = 0;
-    Boolean flag=false;
     int wynik_do_testu=0;
-    AID klient_testowany = new AID();
-    List<AID> lista_klientow = new LinkedList();
-    AID klient_testujacy = new AID();
     int wynik_po_tescie=0;
+    Boolean blad =false;
+    List<AID> lista_klientow = new LinkedList();
+    List<AID> lista_zbanowanych = new LinkedList();
+    Boolean flag=false;
+    AID klient_testowany = new AID();
+    AID klient_testujacy = new AID();
     AID klient_sedziujacy = new AID();
 
     public void action() {
@@ -53,12 +55,14 @@ public class Dist_beh extends CyclicBehaviour {
             if(wiadomosc.getPerformative() == ACLMessage.INFORM)
             {
                 ACLMessage Answ = wiadomosc.createReply();
-                if(ile_wyslanych >(sizeX*sizeX)-1 && ile_bledow == 0 && robione.size()==sizeX*sizeX )
+                SB.delete(0, SB.length());
+                if(ile_wyslanych >(sizeX*sizeX)-1 && ile_bledow == 0 && robione.size()==sizeX*sizeX /*&& elementy_do_zrobienia.size()==0*/)
                 {
                     Answ.setPerformative(ACLMessage.CANCEL);
 
                 }
-                else if (robione.size()<sizeX*sizeX ) {
+                else if (robione.size()<sizeX*sizeX && !lista_zbanowanych.contains(wiadomosc.getSender()))
+                {
                     for(int i = 0; i< elementy_do_zrobienia.size(); i++) //znalezienie elementu do wykonania
                     {
                         elem = elementy_do_zrobienia.get(i).toString();
@@ -75,7 +79,7 @@ public class Dist_beh extends CyclicBehaviour {
                     Answ.setPerformative(ACLMessage.REQUEST);
                     Answ.setContent(Crt_str(Integer.parseInt(ij[0]),Integer.parseInt(ij[1]),tab,0));
                     ile_wyslanych++;
-                }else if(ile_bledow >0&& (ile_poprawnych + ile_bledow)>(sizeX*sizeX)-1)
+                }else if(ile_bledow >0&& (ile_poprawnych + ile_bledow)>(sizeX*sizeX)-1 /*!lista_bledow.isEmpty()&& robione.size()==sizeX*sizeX*/)
                 {
                     System.out.println("OBSLUGA BLEDOW");
                     blad =true;
@@ -84,8 +88,8 @@ public class Dist_beh extends CyclicBehaviour {
                     Answ.setContent(Crt_str(Integer.parseInt(parts[1]),Integer.parseInt(parts[2]),tab,0));
                     numerbledu++;
                     ile_bledow--;
-                }
 
+                }
                 myAgent.send(Answ);
             }
             else if(wiadomosc.getPerformative() == ACLMessage.AGREE)
@@ -142,8 +146,7 @@ public class Dist_beh extends CyclicBehaviour {
                         System.out.println(elementy_do_zrobienia);
                         flag=false;
                     }
-                    else
-                    {
+                    else {
                         ACLMessage wiadomosc_sedziowana = new ACLMessage();
                         for (int i = 0; i< lista_klientow.size(); i++)
                         {
@@ -158,19 +161,36 @@ public class Dist_beh extends CyclicBehaviour {
                         myAgent.send(wiadomosc_sedziowana);
                     }
 
-                }
-                else if(Integer.parseInt(parts[0])==2)
+                } else if(Integer.parseInt(parts[0])==2)
                 {
-                    if (Integer.parseInt(parts[3]) == wynik_po_tescie)
-                    {
+                    if (Integer.parseInt(parts[3]) == wynik_po_tescie) {
+
                         System.out.println("Po sedziowaniu Wynik2 == wynik3");
-                    }
-                    else if (wynik_do_testu == Integer.parseInt(parts[3]))
-                    {
+                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = wynik_po_tescie;
+                        wypisz(wynik,sizeX);
+
+                        ile_poprawnych++;
+                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
+                        System.out.println(elementy_do_zrobienia);
+                        if (!lista_zbanowanych.contains(klient_testowany))
+                            lista_zbanowanych.add(klient_testowany);
+                        System.out.println("ZBANOWANI" + lista_zbanowanych);
+                        flag = false;
+
+                    } else if (wynik_do_testu == Integer.parseInt(parts[3])) {
+
                         System.out.println("Po sedziowaniu Wynik1 == wynik3");
+                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = wynik_do_testu;
+                        wypisz(wynik,sizeX);
+                        ile_poprawnych++;
+                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
+                        System.out.println(elementy_do_zrobienia);
+                        if (!lista_zbanowanych.contains(klient_testujacy))
+                            lista_zbanowanych.add(klient_testujacy);
+                        System.out.println("ZBANOWANI" + lista_zbanowanych);
+                        flag = false;
                     }
                 }
-
             }
             else if (wiadomosc.getPerformative() == ACLMessage.FAILURE)
             {
@@ -179,7 +199,6 @@ public class Dist_beh extends CyclicBehaviour {
                 lista_bledow.add(wiadomosc.getContent());
                 System.out.println(wiadomosc.getContent());
             }
-
         }
         else
         {
@@ -211,6 +230,10 @@ public class Dist_beh extends CyclicBehaviour {
         }
         return SB.toString();
     }
+    public static Integer Rand(Integer a, Integer b){
+        Random r = new Random();
+        return r.nextInt(b-a+1)+a;
+    }
     public void wypisz(int[][] wynik,int sizeX)
     {
         for (int i = 0; i < sizeX; i++) {
@@ -220,6 +243,5 @@ public class Dist_beh extends CyclicBehaviour {
             System.out.println();
         }
     }
-
 
 }

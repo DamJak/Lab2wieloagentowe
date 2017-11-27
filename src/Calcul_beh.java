@@ -8,13 +8,13 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.util.Random;
 
-
 public class Calcul_beh extends CyclicBehaviour {
 
-    Integer wynik = 0;
-    Integer wynik1 = 0;
     String str="";
     StringBuffer SB = new StringBuffer(str);
+    Integer wynik = 0;
+    Integer wynik1 = 0;
+
 
     public void action()
     {
@@ -22,11 +22,12 @@ public class Calcul_beh extends CyclicBehaviour {
         ACLMessage Mess_Rcv = new ACLMessage();
         if(Fnd_Serv(myAgent)!=null)
         {
+
+
             Mess_Rcv = myAgent.receive();
 
             if(Mess_Rcv !=null)
             {
-
                 String odb = Mess_Rcv.getContent();
                 ACLMessage Answ = Mess_Rcv.createReply();
 
@@ -80,15 +81,14 @@ public class Calcul_beh extends CyclicBehaviour {
                         Answ.setPerformative(ACLMessage.AGREE);
                         myAgent.send(Answ);
                     }
-
                 }
+
                 else if(Mess_Rcv.getPerformative() == ACLMessage.CANCEL)
                 {
                     System.out.println("Nie mam co robic " + myAgent.getName().toString());
                     myAgent.doDelete();
 
                 }
-
             }
             else {
                 if(Fnd_Serv(myAgent)!=null)
@@ -100,8 +100,11 @@ public class Calcul_beh extends CyclicBehaviour {
                     myAgent.send(Mess_Snd);
                 }
                 block();
+
+
             }
         }
+
     }
 
     public DFAgentDescription[] Fnd_Serv(Agent myAgent)
@@ -123,14 +126,6 @@ public class Calcul_beh extends CyclicBehaviour {
         return r.nextInt(b-a+1)+a;
 
     }
-    public int oblicz(String[] parts)
-    {
-        wynik=0;
-        for (int i = 4; i < (Integer.parseInt(parts[1]) + 4); i++) {
-            wynik += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[1])]);
-        }
-        return wynik;
-    }
     public String Crt_str(String i ,String j, int wynik,int typ) {
         SB.delete(0, SB.length());
         SB.append(typ); //aktualna pozycja
@@ -142,5 +137,12 @@ public class Calcul_beh extends CyclicBehaviour {
         SB.append(wynik);
         return SB.toString();
     }
-
+    public int oblicz(String[] parts)
+    {
+        wynik=0;
+        for (int i = 4; i < (Integer.parseInt(parts[1]) + 4); i++) {
+            wynik += Integer.parseInt(parts[i]) * Integer.parseInt(parts[i + Integer.parseInt(parts[1])]);
+        }
+        return wynik;
+    }
 }
