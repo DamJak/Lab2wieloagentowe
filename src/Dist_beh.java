@@ -36,6 +36,7 @@ public class Dist_beh extends CyclicBehaviour {
     AID klient_testowany = new AID();
     List<AID> lista_klientow = new LinkedList();
     AID klient_testujacy = new AID();
+    int wynik_po_tescie=0;
 
     public void action() {
         ACLMessage wiadomosc = new ACLMessage();
@@ -124,6 +125,35 @@ public class Dist_beh extends CyclicBehaviour {
                     if (czy_test == 3)
                         czy_test = 0;
                     czy_test++;
+                }
+                else if(Integer.parseInt(parts[0])==1)
+                {
+                    wynik_po_tescie = Integer.parseInt(parts[3]);
+
+                    if(Integer.parseInt(parts[3])==wynik_do_testu)
+                    {
+                        System.out.println("PO PRZEPROWADZONYCH TESTACH WYNIK ["+ Integer.parseInt(parts[1])+
+                                "]["+Integer.parseInt(parts[2])+"] SIE ZGADZA");
+                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = Integer.parseInt(parts[3]);
+                        wypisz(wynik,sizeX);
+                        ile_poprawnych++;
+                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
+                        System.out.println(elementy_do_zrobienia);
+                        flag=false;
+                    }
+                    else
+                    {
+                        System.out.println("Wynik sie nie zgadza");
+                        System.out.println("PO PRZEPROWADZONYCH TESTACH WYNIK ["+ Integer.parseInt(parts[1])+
+                                "]["+Integer.parseInt(parts[2])+"] SIE ZGADZA");
+                        wynik[Integer.parseInt(parts[1])][Integer.parseInt(parts[2])] = 99;
+                        wypisz(wynik,sizeX);
+                        ile_poprawnych++;
+                        elementy_do_zrobienia.remove(Integer.parseInt(parts[1]) + " " + Integer.parseInt(parts[2]));
+                        System.out.println(elementy_do_zrobienia);
+                        flag=false;
+                    }
+
                 }
 
             }
